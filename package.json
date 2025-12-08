@@ -1,0 +1,66 @@
+{
+  "name": "laymur-spine",
+  "version": "0.0.1",
+  "description": "Spine animation support for Laymur UI library",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && rollup -c",
+    "build:prod": "npm run clean && NODE_ENV=production rollup -c",
+    "prepublishOnly": "npm run build:prod"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": {
+        "development": "./dist/index.js",
+        "production": "./dist/index.min.js",
+        "default": "./dist/index.min.js"
+      },
+      "require": "./dist/index.min.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "ui",
+    "three.js",
+    "spine",
+    "mobile",
+    "ads",
+    "constraints",
+    "layout",
+    "typescript"
+  ],
+  "author": "jango",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jango-git/laymur-spine.git"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@esotericsoftware/spine-threejs": "^4.2.0",
+    "laymur": ">=0.10.0 <0.11.0",
+    "three": ">=0.175.0 <0.180.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/three": "^0.175.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^9.26.0",
+    "rollup": "^4.40.2",
+    "rollup-plugin-string": "^3.0.0",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "ts-transformer-minify-privates": "^1.0.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {}
+}
