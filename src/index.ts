@@ -1,1 +1,1 @@
-export * from "./UISpine";
+export { UISpine } from "./UISpine";
