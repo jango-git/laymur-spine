@@ -36,6 +36,7 @@ export class UISpine extends UIDummy {
 
   protected onWillRender = (renderer: WebGLRenderer, deltaTime: number): void => {
     this.skeletonMesh.position.set(this.x, this.y, this.zIndex);
+    this.skeletonMesh.renderOrder = this.zIndex;
     this.skeletonMesh.update(deltaTime);
   };
 }
