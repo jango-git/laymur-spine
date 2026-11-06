@@ -1,32 +1,7 @@
 {
   "name": "laymur-spine",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Spine animation support for Laymur UI library",
-  "scripts": {
-    "clean": "rm -rf dist",
-    "build": "npm run clean && rollup -c",
-    "build:prod": "npm run clean && NODE_ENV=production rollup -c",
-    "prepublishOnly": "npm run build:prod"
-  },
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": {
-        "development": "./dist/index.js",
-        "production": "./dist/index.min.js",
-        "default": "./dist/index.min.js"
-      },
-      "require": "./dist/index.min.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist"
-  ],
-  "sideEffects": false,
   "keywords": [
     "ui",
     "three.js",
@@ -44,23 +19,37 @@
     "url": "git+https://github.com/jango-git/laymur-spine.git"
   },
   "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "peerDependencies": {
-    "@esotericsoftware/spine-threejs": "^4.2.0",
-    "laymur": ">=0.19.0 <0.20.0",
-    "three": ">=0.157.0 <0.180.0"
+    "@esotericsoftware/spine-threejs": "~4.2.0",
+    "laymur": ">=0.25.2 <0.26.0",
+    "three": ">=0.162.0 <0.180.0"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@types/three": "^0.175.0",
+    "@types/three": "^0.162.0",
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
     "eslint": "^9.26.0",
-    "rollup": "^4.40.2",
-    "rollup-plugin-string": "^3.0.0",
-    "rollup-plugin-typescript2": "^0.36.0",
-    "ts-transformer-minify-privates": "^1.0.0",
     "typescript": "^5.8.3"
-  },
-  "dependencies": {}
+  }
 }
