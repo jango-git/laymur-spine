@@ -1,6 +1,6 @@
 {
   "name": "laymur-spine",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Spine animation support for Laymur UI library",
   "keywords": [
     "ui",
@@ -42,7 +42,7 @@
   },
   "peerDependencies": {
     "@esotericsoftware/spine-threejs": "~4.2.0",
-    "laymur": ">=0.25.2 <0.26.0",
+    "laymur": ">=0.26.0 <0.27.0",
     "three": ">=0.162.0 <0.180.0"
   },
   "devDependencies": {

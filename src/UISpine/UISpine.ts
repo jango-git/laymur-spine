@@ -6,8 +6,8 @@ import type {
 } from "@esotericsoftware/spine-threejs";
 import { Physics, SkeletonMesh } from "@esotericsoftware/spine-threejs";
 import type { UILayer } from "laymur";
-import { computeTransformMatrix, isUIModeVisible, UIDummy, UIMicro } from "laymur";
-import type { MaterialParameters, WebGLRenderer } from "three";
+import { isUIModeVisible, UIDummy, UIMaskMaterialPatch, UIMicro } from "laymur";
+import type { Material, MaterialParameters, WebGLRenderer } from "three";
 import { Group, Matrix4 } from "three";
 import type { UISpineFitMode, UISpineOptions, UISpineRect } from "./UISpine.Internal.js";
 import {
@@ -19,6 +19,7 @@ import {
 } from "./UISpine.Internal.js";
 import { readSkeletonDataRect } from "./UISpine.Measuring.js";
 
+const TEMP_ELEMENT_MATRIX = new Matrix4();
 const TEMP_REFERENCE_MATRIX = new Matrix4();
 
 /**
@@ -31,6 +32,9 @@ const TEMP_REFERENCE_MATRIX = new Matrix4();
  *
  * Layout moves only the container, never the skeleton itself, so physics constraints do not
  * react to layout changes.
+ *
+ * A mask assigned to the element clips the skeleton as well as its input: the skeleton
+ * materials are patched with UIMaskMaterialPatch the first time a mask is set.
  */
 export class UISpine extends UIDummy {
   /** Transforms that don't affect constraints */
@@ -46,6 +50,10 @@ export class UISpine extends UIDummy {
   private readonly container = new Group();
   private readonly referenceRectInternal: UISpineRect;
   private fitModeInternal: UISpineFitMode;
+
+  /** Clips the skeleton materials by the mask */
+  private readonly maskPatch = new UIMaskMaterialPatch();
+  private maskPatchUsed = false;
 
   /**
    * Creates a new UISpine instance.
@@ -134,6 +142,7 @@ export class UISpine extends UIDummy {
   /** Frees the skeleton meshes and their materials; textures belong to the atlas */
   protected override destroyInternal(): void {
     this.layer.signalRendering.off(this.handleWillRender);
+    this.maskPatch.destroy();
     this.layer.sceneWrapper.removeOrderedObject(this.container);
     this.container.remove(this.skeletonMesh);
     this.skeletonMesh.dispose();
@@ -159,21 +168,7 @@ export class UISpine extends UIDummy {
     // micro are internal to laymur
     const width = this.width;
     const height = this.height;
-    const elementMatrix = computeTransformMatrix(
-      this.x,
-      this.y,
-      width,
-      height,
-      this.renderDepth,
-      this.micro.x,
-      this.micro.y,
-      this.micro.anchorX,
-      this.micro.anchorY,
-      this.micro.scaleX,
-      this.micro.scaleY,
-      this.micro.rotation,
-      this.micro.anchorMode,
-    );
+    const elementMatrix = this.computeVisualTransform(true, TEMP_ELEMENT_MATRIX, this.renderDepth);
     const referenceMatrix = composeReferenceMatrix(
       TEMP_REFERENCE_MATRIX,
       this.referenceRectInternal,
@@ -183,6 +178,39 @@ export class UISpine extends UIDummy {
     );
     this.container.matrix.multiplyMatrices(elementMatrix, referenceMatrix);
     this.container.matrixWorldNeedsUpdate = true;
+
+    this.updateMask();
+  }
+
+  /** Input and masks follow the micro transform of the skeleton */
+  protected override getMicro(): UIMicro {
+    return this.micro;
+  }
+
+  /**
+   * Keeps the skeleton materials clipped by the mask. Materials are created lazily with the
+   * batches, and spine-threejs sets their onBeforeCompile after the material factory returns,
+   * so they are patched here rather than in the factory.
+   */
+  private updateMask(): void {
+    if (this.mask !== null) {
+      this.maskPatchUsed = true;
+    }
+    if (!this.maskPatchUsed) {
+      return;
+    }
+
+    for (const batch of this.skeletonMesh.children) {
+      const material = (batch as { material?: Material | Material[] }).material;
+      if (Array.isArray(material)) {
+        for (const item of material) {
+          this.maskPatch.apply(item);
+        }
+      } else if (material !== undefined) {
+        this.maskPatch.apply(material);
+      }
+    }
+    this.maskPatch.update(this.mask);
   }
 
   private readonly handleWillRender = (renderer: WebGLRenderer, deltaTime: number): void => {

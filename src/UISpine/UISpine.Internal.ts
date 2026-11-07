@@ -46,7 +46,8 @@ export interface UISpineOptions extends UIDummyOptions {
   /**
    * Creates the materials of the skeleton meshes. The parameters it receives already have the
    * depth test and depth write turned off; keep them off, the draw order of the layer and of
-   * the skeleton's own slots relies on it.
+   * the skeleton's own slots relies on it. Return a new material on every call: a material
+   * shared between skeletons cannot follow the mask of each.
    */
   materialFactory: (parameters: MaterialParameters) => MaterialWithMap;
 }

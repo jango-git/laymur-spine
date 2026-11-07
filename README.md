@@ -28,7 +28,15 @@ new UIVerticalProportionConstraint(layer, hero, { proportion: 0.5 });
 new UIHorizontalDistanceConstraint(layer, hero, { anchorA: 0.5, anchorB: 0.5 });
 
 hero.state.setAnimation(0, "idle", true);
-hero.micro.scaleX = 1.1; // visual-only, like on other elements
+hero.micro.scaleX = 1.1; // bypasses the solver; input follows it, like on other elements
+```
+
+A `UIMask` assigned to the element clips the skeleton as well as its input:
+
+```typescript
+import { UIMask } from "laymur";
+
+hero.mask = new UIMask(viewport, { softness: 8 });
 ```
 
 ## License
