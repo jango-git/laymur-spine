@@ -41,6 +41,11 @@ export interface UISpineOptions extends UIDummyOptions {
   referenceRect: UISpineRect;
   /** How the reference rectangle is placed into the element box */
   fitMode: UISpineFitMode;
+  /**
+   * Longest animation step in seconds; longer frames, such as after a hidden tab, are clamped,
+   * so the animation does not jump and physics constraints do not take one huge step
+   */
+  maxDeltaTime: number;
   /** Enables Spine tint black; spine-threejs turns it on when omitted */
   twoColorTint: boolean;
   /**
@@ -53,6 +58,7 @@ export interface UISpineOptions extends UIDummyOptions {
 }
 
 export const SPINE_DEFAULT_FIT_MODE = UISpineFitMode.STRETCH;
+export const SPINE_DEFAULT_MAX_DELTA_TIME = 0.1;
 
 /**
  * Material parameters UISpine forces on top of the spine-threejs defaults. Laymur draws without
@@ -71,6 +77,17 @@ export const SPINE_MATERIAL_OVERRIDES: MaterialParameters = {
  */
 export function createSpineMaterial(parameters: MaterialParameters): MaterialWithMap {
   return new MeshBasicMaterial(parameters);
+}
+
+/**
+ * Throws if the value is not a positive finite number.
+ * @param value Value to check
+ * @param subject Name of the checked value for the error message
+ */
+export function assertValidPositiveNumber(value: number, subject: string): void {
+  if (!(value > 0) || !Number.isFinite(value)) {
+    throw new Error(`${subject}: must be a positive finite number, got ${value}`);
+  }
 }
 
 /**
@@ -120,6 +137,7 @@ export function composeReferenceMatrix(
     offsetY = (1 - rect.height * scaleY) / 2;
   }
 
+  // prettier-ignore
   return target.set(
     scaleX, 0, 0, offsetX - rect.x * scaleX,
     0, scaleY, 0, offsetY - rect.y * scaleY,

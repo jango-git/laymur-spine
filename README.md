@@ -14,7 +14,11 @@ npm install laymur laymur-spine @esotericsoftware/spine-threejs
 skeleton space onto its box: by default the setup pose bounds stored in the skeleton file.
 
 ```typescript
-import { UIAspectConstraint, UIHorizontalDistanceConstraint, UIVerticalProportionConstraint } from "laymur";
+import {
+  UIAspectConstraint,
+  UIHorizontalDistanceConstraint,
+  UIVerticalProportionConstraint,
+} from "laymur";
 import { UISpine, UISpineFitMode, measureBoundingBoxAttachment } from "laymur-spine";
 
 const hero = new UISpine(layer, skeletonData, {
@@ -30,6 +34,9 @@ new UIHorizontalDistanceConstraint(layer, hero, { anchorA: 0.5, anchorB: 0.5 });
 hero.state.setAnimation(0, "idle", true);
 hero.micro.scaleX = 1.1; // bypasses the solver; input follows it, like on other elements
 ```
+
+A frame step longer than `maxDeltaTime` (0.1 s by default) is clamped, so after a hidden tab the
+animation does not jump and physics constraints do not swing out.
 
 A `UIMask` assigned to the element clips the skeleton as well as its input:
 

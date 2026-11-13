@@ -8,6 +8,7 @@ import {
   SkeletonClipping,
   Vector2,
 } from "@esotericsoftware/spine-threejs";
+
 import type { UISpineRect } from "./UISpine.Internal.js";
 
 /** Options for measuring a bounding box attachment */

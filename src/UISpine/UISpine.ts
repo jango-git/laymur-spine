@@ -9,12 +9,15 @@ import type { UILayer } from "laymur";
 import { isUIModeVisible, UIDummy, UIMaskMaterialPatch, UIMicro } from "laymur";
 import type { Material, MaterialParameters, WebGLRenderer } from "three";
 import { Group, Matrix4 } from "three";
+
 import type { UISpineFitMode, UISpineOptions, UISpineRect } from "./UISpine.Internal.js";
 import {
+  assertValidPositiveNumber,
   assertValidSpineRect,
   composeReferenceMatrix,
   createSpineMaterial,
   SPINE_DEFAULT_FIT_MODE,
+  SPINE_DEFAULT_MAX_DELTA_TIME,
   SPINE_MATERIAL_OVERRIDES,
 } from "./UISpine.Internal.js";
 import { readSkeletonDataRect } from "./UISpine.Measuring.js";
@@ -50,6 +53,7 @@ export class UISpine extends UIDummy {
   private readonly container = new Group();
   private readonly referenceRectInternal: UISpineRect;
   private fitModeInternal: UISpineFitMode;
+  private maxDeltaTimeInternal: number;
 
   /** Clips the skeleton materials by the mask */
   private readonly maskPatch = new UIMaskMaterialPatch();
@@ -61,7 +65,7 @@ export class UISpine extends UIDummy {
    * @param layer - Layer containing this element
    * @param skeletonData - Skeleton to display; one SkeletonData can back many elements
    * @param options - Configuration options
-   * @throws If the reference rectangle has no area
+   * @throws If the reference rectangle has no area or maxDeltaTime is not positive
    */
   constructor(layer: UILayer, skeletonData: SkeletonData, options: Partial<UISpineOptions> = {}) {
     const referenceRect = { ...(options.referenceRect ?? readSkeletonDataRect(skeletonData)) };
@@ -81,6 +85,11 @@ export class UISpine extends UIDummy {
     this.micro = new UIMicro(options.micro);
     this.referenceRectInternal = referenceRect;
     this.fitModeInternal = options.fitMode ?? SPINE_DEFAULT_FIT_MODE;
+    this.maxDeltaTimeInternal = options.maxDeltaTime ?? SPINE_DEFAULT_MAX_DELTA_TIME;
+    assertValidPositiveNumber(
+      this.maxDeltaTimeInternal,
+      "UISpine.constructor.options.maxDeltaTime",
+    );
 
     const materialFactory = options.materialFactory ?? createSpineMaterial;
     this.skeletonMesh = new SkeletonMesh({
@@ -120,6 +129,11 @@ export class UISpine extends UIDummy {
     return this.fitModeInternal;
   }
 
+  /** Longest animation step in seconds; longer frames are clamped */
+  public get maxDeltaTime(): number {
+    return this.maxDeltaTimeInternal;
+  }
+
   /**
    * Skeleton-space rectangle mapped onto the element box. Changing it does not resize the
    * element; set width and height as well if the layout should follow.
@@ -139,6 +153,13 @@ export class UISpine extends UIDummy {
     this.fitModeInternal = value;
   }
 
+  /** Longest animation step in seconds; longer frames are clamped */
+  public set maxDeltaTime(value: number) {
+    this.assertNotDestroyed("UISpine.maxDeltaTime");
+    assertValidPositiveNumber(value, "UISpine.maxDeltaTime");
+    this.maxDeltaTimeInternal = value;
+  }
+
   /** Frees the skeleton meshes and their materials; textures belong to the atlas */
   protected override destroyInternal(): void {
     this.layer.signalRendering.off(this.handleWillRender);
@@ -154,7 +175,7 @@ export class UISpine extends UIDummy {
    * while the element is hidden, the same as particles of a hidden emitter.
    */
   protected onWillRender(renderer: WebGLRenderer, deltaTime: number): void {
-    this.skeletonMesh.update(deltaTime);
+    this.skeletonMesh.update(Math.min(deltaTime, this.maxDeltaTimeInternal));
     // Batches are created lazily and their bounding spheres are computed once, from whatever pose
     // was there; culling by them would drop parts of a moving skeleton
     for (const batch of this.skeletonMesh.children) {
