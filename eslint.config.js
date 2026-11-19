@@ -94,6 +94,9 @@ export default [
           format: ["camelCase"],
           leadingUnderscore: "allow",
         },
+        // A property key that requires quotes (a hyphenated string, a reserved word) carries an
+        // external contract/ABI shape - it is data, not an identifier - so casing does not apply.
+        { selector: "property", modifiers: ["requiresQuotes"], format: null },
         {
           selector: "classProperty",
           format: ["camelCase"],

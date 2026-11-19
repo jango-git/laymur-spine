@@ -3,6 +3,29 @@
 Every notable change to laymur-spine. Versions follow semver; while the major is 0, any release
 may break the API. Breaking changes are marked.
 
+## 0.0.7 - 2026-11-19
+
+### Changed
+
+- **Breaking:** requires laymur 0.29 (`>=0.29.0 <0.30.0`).
+
+### Added
+
+- `zIndex` in `UISpineOptions`, from the laymur 0.29 element options.
+
+## 0.0.6 - 2026-11-19
+
+### Changed
+
+- **Breaking:** requires laymur 0.28 (`>=0.28.0 <0.29.0`).
+
+## 0.0.5 - 2026-11-16
+
+### Changed
+
+- The `three` peer range is `>=0.162.0 <0.185.0`, up from `<0.180.0`. The upper bound is the one
+  `@esotericsoftware/spine-threejs` 4.2 declares.
+
 ## 0.0.4 - 2026-11-13
 
 ### Changed
