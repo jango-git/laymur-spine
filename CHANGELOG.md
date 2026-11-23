@@ -3,7 +3,7 @@
 Every notable change to laymur-spine. Versions follow semver; while the major is 0, any release
 may break the API. Breaking changes are marked.
 
-## Unreleased
+## 0.0.8 - 2026-11-23
 
 ### Changed
 
