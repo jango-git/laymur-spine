@@ -26,6 +26,14 @@ const TEMP_ELEMENT_MATRIX = new Matrix4();
 const TEMP_REFERENCE_MATRIX = new Matrix4();
 
 /**
+ * Rebuilds the batches of a skeleton mesh from the current pose. spine-threejs declares it
+ * private; its public update also advances the animation and fires its listeners.
+ */
+interface SkeletonGeometryBuilder {
+  updateGeometry(): void;
+}
+
+/**
  * Spine skeleton laid out as a rectangle.
  *
  * The skeleton has no edges of its own: its bounds follow the animation. So the element maps a
@@ -107,6 +115,7 @@ export class UISpine extends UIDummy {
 
     this.layer.sceneWrapper.insertOrderedObject(this.container, this.renderDepth);
     this.layer.signalRendering.on(this.handleWillRender);
+    this.layer.signalCompiling.on(this.onCompiling);
   }
 
   /** Skeleton pose: bones, slots, skin, color */
@@ -163,6 +172,7 @@ export class UISpine extends UIDummy {
   /** Frees the skeleton meshes and their materials; textures belong to the atlas */
   protected override destroyInternal(): void {
     this.layer.signalRendering.off(this.handleWillRender);
+    this.layer.signalCompiling.off(this.onCompiling);
     this.maskPatch.destroy();
     this.layer.sceneWrapper.removeOrderedObject(this.container);
     this.container.remove(this.skeletonMesh);
@@ -176,6 +186,16 @@ export class UISpine extends UIDummy {
    */
   protected onWillRender(renderer: WebGLRenderer, deltaTime: number): void {
     this.skeletonMesh.update(Math.min(deltaTime, this.maxDeltaTimeInternal));
+    this.synchronizeObjects();
+  }
+
+  /** Input and masks follow the micro transform of the skeleton */
+  protected override getMicro(): UIMicro {
+    return this.micro;
+  }
+
+  /** Brings the batches, their visibility, placement and mask clipping up to the current pose */
+  private synchronizeObjects(): void {
     // Batches are created lazily and their bounding spheres are computed once, from whatever pose
     // was there; culling by them would drop parts of a moving skeleton
     for (const batch of this.skeletonMesh.children) {
@@ -201,11 +221,6 @@ export class UISpine extends UIDummy {
     this.container.matrixWorldNeedsUpdate = true;
 
     this.updateMask();
-  }
-
-  /** Input and masks follow the micro transform of the skeleton */
-  protected override getMicro(): UIMicro {
-    return this.micro;
   }
 
   /**
@@ -236,5 +251,11 @@ export class UISpine extends UIDummy {
 
   private readonly handleWillRender = (renderer: WebGLRenderer, deltaTime: number): void => {
     this.onWillRender(renderer, deltaTime);
+  };
+
+  /** Creates the batches of the current pose before their first frame, so their programs build */
+  private readonly onCompiling = (): void => {
+    (this.skeletonMesh as unknown as SkeletonGeometryBuilder).updateGeometry();
+    this.synchronizeObjects();
   };
 }

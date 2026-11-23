@@ -3,6 +3,17 @@
 Every notable change to laymur-spine. Versions follow semver; while the major is 0, any release
 may break the API. Breaking changes are marked.
 
+## Unreleased
+
+### Changed
+
+- **Breaking:** requires laymur 0.30 (`>=0.30.0 <0.31.0`).
+
+### Added
+
+- `UISpine` takes part in `UILayer.compile`: the skeleton meshes are created from the current
+  pose, without advancing the animation, and their programs are built with the layer.
+
 ## 0.0.7 - 2026-11-19
 
 ### Changed

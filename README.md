@@ -46,6 +46,11 @@ import { UIMask } from "laymur";
 hero.mask = new UIMask(viewport, { softness: 8 });
 ```
 
+`layer.compile(renderer)` builds the programs of the skeleton as well. spine-threejs creates the
+skeleton meshes on the first frame, so for `compile()` they are created from the current pose,
+without advancing the animation. An attachment with another blend mode or texture that appears
+later in the animation may build a program on its first frame.
+
 ## License
 
 MIT
