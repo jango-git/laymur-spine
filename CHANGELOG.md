@@ -3,6 +3,16 @@
 Every notable change to laymur-spine. Versions follow semver; while the major is 0, any release
 may break the API. Breaking changes are marked.
 
+## Unreleased
+
+### Changed
+
+- `private` class members and members marked `@internal` are emitted with a `_private_` prefix,
+  so that a minifier can shorten them. Add a property mangling rule for the prefix to the
+  minifier of the app (terser `mangle: { properties: { regex: /^_private_/ } }`, esbuild
+  `--mangle-props=^_private_`). Without the rule the minified code is larger than before. Code
+  that reached into such members by name stops working.
+
 ## 0.0.8 - 2026-11-23
 
 ### Changed

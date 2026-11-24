@@ -8,6 +8,12 @@ Spine animation support for [Laymur](https://github.com/jango-git/laymur) UI lib
 npm install laymur laymur-spine @esotericsoftware/spine-threejs
 ```
 
+### Private members
+
+The published code prefixes class members outside the API with `_private_`. A minifier shortens
+them when given the prefix: terser `mangle: { properties: { regex: /^_private_/ } }`, esbuild
+`--mangle-props=^_private_`.
+
 ## Usage
 
 `UISpine` is a rectangle like any other Laymur element. It maps a fixed reference rectangle of
